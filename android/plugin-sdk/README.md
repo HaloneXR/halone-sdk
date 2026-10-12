@@ -16,13 +16,7 @@ dependencies {
 }
 ```
 
-It is not published yet. Until it is, add this repository as a submodule and
-let Gradle build it in place of the published library:
-
-```kotlin
-// settings.gradle.kts
-includeBuild("sdk/android")
-```
+It is on Maven Central, so the project's repositories need `mavenCentral()`.
 
 ## Declare the service
 
