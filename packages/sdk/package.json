@@ -1,0 +1,50 @@
+{
+  "name": "@halone/sdk",
+  "version": "0.1.0",
+  "description": "Build apps for Halone, the XR environment for XREAL glasses: the bridge to the shell and its types",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HaloneXR/halone-sdk.git",
+    "directory": "packages/sdk"
+  },
+  "homepage": "https://halone.dev/",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./host": {
+      "types": "./dist/host.d.ts",
+      "import": "./dist/host.js"
+    },
+    "./protocol": {
+      "types": "./dist/protocol.d.ts",
+      "import": "./dist/protocol.js"
+    },
+    "./files": {
+      "types": "./dist/files.d.ts",
+      "import": "./dist/files.js"
+    },
+    "./permissions": {
+      "types": "./dist/permissions.d.ts",
+      "import": "./dist/permissions.js"
+    },
+    "./package": {
+      "types": "./dist/package.d.ts",
+      "import": "./dist/package.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "vite build && tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p ."
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
