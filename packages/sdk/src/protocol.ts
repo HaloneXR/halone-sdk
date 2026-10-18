@@ -199,7 +199,7 @@ export interface MediaState extends MediaLayout {
 }
 
 export interface SystemInfo {
-  platform: 'simulator' | 'android'
+  platform: 'simulator' | 'android' | 'desktop'
   version: string
   protocolVersion: number
   device: {
