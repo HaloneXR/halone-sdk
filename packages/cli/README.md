@@ -7,13 +7,16 @@ builds with the project's own Vite.
 ```sh
 halone dev                  # serve with hot reload and run it in the simulator
 halone dev --device         # the same on the glasses, through adb reverse
+halone dev --desktop        # the same in Halone on this computer
 halone pack                 # vite build, then <id>-<version>.halone
 halone install x.halone --device --launch
-halone uninstall <id> [--device]
-halone list [--device]
+halone install x.halone --desktop --launch
+halone uninstall <id> [--device|--desktop]
+halone list [--device|--desktop]
 ```
 
-Developer mode has to be on (Settings → Developer) in the simulator or on the
-glasses. A dev app is granted its manifest's permissions without a prompt.
+Developer mode has to be on (Settings → Developer) in the simulator, on the
+glasses or on the desktop. A dev app is granted its manifest's permissions
+without a prompt.
 
 MIT.

@@ -4,17 +4,18 @@ import { join, resolve } from 'node:path'
 import { pathToFileURL } from 'node:url'
 import { parseArgs } from 'node:util'
 import { findManifest, pack, readManifest } from './project'
-import { Device, simulator, type Answer } from './targets'
+import { Device, desktop, simulator, type Answer } from './targets'
 
 const HELP = `halone: build and run Halone apps
 
-  halone dev [--device] [--port 5180]      serve the app with hot reload and run it
-  halone pack [--out dir]                  build with Vite and write <id>-<version>.halone
-  halone install <file.halone> [--launch]  install a package on the phone
-  halone uninstall <id> [--device]         remove an app
-  halone list [--device]                   the Halone apps installed
+  halone dev [--device|--desktop] [--port 5180]  serve the app with hot reload and run it
+  halone pack [--out dir]                        build with Vite and write <id>-<version>.halone
+  halone install <file.halone> [--launch]        install a package on the phone or the desktop
+  halone uninstall <id> [--device|--desktop]     remove an app
+  halone list [--device|--desktop]               the Halone apps installed
 
   --device          the phone over adb (needs developer mode); otherwise the simulator
+  --desktop         Halone running on this computer (needs developer mode)
   --serial <s>      which phone, when adb sees several
   --simulator <url> the simulator, http://127.0.0.1:5173 by default
 `
@@ -23,6 +24,7 @@ const { values, positionals } = parseArgs({
   allowPositionals: true,
   options: {
     device: { type: 'boolean', default: false },
+    desktop: { type: 'boolean', default: false },
     serial: { type: 'string' },
     simulator: { type: 'string', default: 'http://127.0.0.1:5173' },
     port: { type: 'string', default: '5180' },
@@ -50,13 +52,14 @@ async function dev(dir: string) {
   const server = await vite.createServer({ root: dir, server: { host: '127.0.0.1', port, strictPort: true } })
   await server.listen()
   const device = values.device ? new Device(values.serial) : null
-  const target = device ? 'the phone' : 'the simulator'
+  const target = device ? 'the phone' : values.desktop ? 'this computer' : 'the simulator'
   const url = `http://${device ? 'localhost' : '127.0.0.1'}:${port}/${manifest.entry}`
   const run = async () => {
     if (device) {
       device.reverse(port)
       return check(device.send('dev', { url }))
     }
+    if (values.desktop) return check(await desktop({ command: 'dev', url }))
     return check(await simulator(values.simulator!, { command: 'dev', url }))
   }
   await run()
@@ -69,6 +72,8 @@ async function dev(dir: string) {
       if (device) {
         device.send('uninstall', { id: manifest.id })
         device.unreverse(port)
+      } else if (values.desktop) {
+        await desktop({ command: 'uninstall', id: manifest.id })
       } else {
         await simulator(values.simulator!, { command: 'uninstall', id: manifest.id })
       }
@@ -101,7 +106,11 @@ async function main() {
       return packCommand(dir)
     case 'install': {
       if (!argument) throw new Error('which .halone file?')
-      if (!values.device) throw new Error('installing a package into the simulator is not supported yet; use `halone dev`, or --device')
+      if (values.desktop) {
+        const answer = check(await desktop({ command: 'install', path: resolve(argument), launch: values.launch! }))
+        return console.log(`installed ${answer.id} ${answer.version}`)
+      }
+      if (!values.device) throw new Error('installing a package into the simulator is not supported yet; use `halone dev`, --device or --desktop')
       const device = new Device(values.serial)
       const answer = check(device.send('install', { path: device.push(resolve(argument)), launch: values.launch! }))
       return console.log(`installed ${answer.id} ${answer.version}`)
@@ -109,11 +118,14 @@ async function main() {
     case 'uninstall': {
       if (!argument) throw new Error('which app id?')
       if (values.device) check(new Device(values.serial).send('uninstall', { id: argument }))
+      else if (values.desktop) check(await desktop({ command: 'uninstall', id: argument }))
       else check(await simulator(values.simulator!, { command: 'uninstall', id: argument }))
       return console.log(`removed ${argument}`)
     }
     case 'list': {
-      const answer = values.device ? check(new Device(values.serial).send('list')) : check(await simulator(values.simulator!, { command: 'list' }))
+      const answer = values.device
+        ? check(new Device(values.serial).send('list'))
+        : check(await (values.desktop ? desktop({ command: 'list' }) : simulator(values.simulator!, { command: 'list' })))
       return console.log(JSON.stringify(answer.apps, null, 2))
     }
     default:
