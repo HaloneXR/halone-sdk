@@ -200,6 +200,8 @@ export interface MediaState extends MediaLayout {
 
 export interface SystemInfo {
   platform: 'simulator' | 'android' | 'desktop'
+  /** The operating system Halone runs on, where it is not the platform itself. */
+  os?: 'macos' | 'linux' | 'windows'
   version: string
   protocolVersion: number
   device: {
@@ -419,6 +421,8 @@ export interface Settings {
   'browser.adBlocker': boolean
   'panel.distanceMetres': number
   'display.brightness': number
+  /** On Linux, marks supported glasses as not a desktop monitor while Halone runs, and puts them back after. */
+  'display.patchGlassesEdid': boolean
   'media.screenWidthDegrees': number
   /** Below 1, a 180° or 360° video is squeezed so more of it fits in view. */
   'media.sphereZoom': number
@@ -433,6 +437,8 @@ export interface Settings {
   'input.pointer': 'gaze' | 'phone' | 'touchpad'
   'input.touchpadSpeed': number
   'input.mouseSpeed': number
+  /** On Linux, Halone takes every key while its window is focused, Alt+Tab and the Meta key included. */
+  'input.rawKeyboard': boolean
   'gesture.glasses.left.tap': GlassesGestureAction
   'gesture.glasses.right.tap': GlassesGestureAction
   'gesture.glasses.left.doubleTap': GlassesGestureAction
@@ -520,6 +526,8 @@ export interface Methods {
   'input.keyCapture': { params: void; result: { enabled: boolean } }
   /** Opens Android's accessibility settings on the phone, where key capture is turned on. */
   'input.openKeyCaptureSettings': { params: void; result: void }
+  /** Gives the keyboard and the mouse back to the desktop, as Alt+Tab would where Halone does not take every key. */
+  'input.releaseToDesktop': { params: void; result: void }
   'launcher.get': { params: void; result: { open: boolean } }
   'launcher.setOpen': { params: { open: boolean }; result: void }
   /** The apps to offer the wearer; with [includeHidden] also the ones only opened for a file or by the shell. */

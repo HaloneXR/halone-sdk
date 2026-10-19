@@ -147,6 +147,7 @@ export function createClient(connection: Promise<Connection>) {
     input: {
       keyCapture: () => call('input.keyCapture'),
       openKeyCaptureSettings: () => call('input.openKeyCaptureSettings'),
+      releaseToDesktop: () => call('input.releaseToDesktop'),
     },
     launcher: {
       get: () => call('launcher.get'),
