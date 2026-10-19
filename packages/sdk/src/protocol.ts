@@ -427,6 +427,8 @@ export interface Settings {
   'bedMode.enabled': boolean
   /** Lets `@halone/cli` install apps over adb, and run apps from a developer's server. */
   'developer.enabled': boolean
+  /** Keeps Halone's own log on the device and offers to share a report after a crash. Off by default. */
+  'diagnostics.crashReports': boolean
   'bedMode.dwellSeconds': number
   'bedMode.countdownSeconds': number
   'bedMode.forwardDegrees': number
