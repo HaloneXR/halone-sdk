@@ -92,6 +92,7 @@ export function createClient(connection: Promise<Connection>) {
         return performance.now() - sentAt
       },
       battery: () => call('system.battery'),
+      shareLog: () => call('system.shareLog'),
     },
     screen: {
       capture: (delayMs?: number) => call('screen.capture', { delayMs }),
