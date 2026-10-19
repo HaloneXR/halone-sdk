@@ -410,6 +410,10 @@ export interface Settings {
   /** Hides every window while the pointer is on none of them. */
   'windows.autoHide': boolean
   'windows.autoHideDelaySeconds': number
+  /** A title-bar button that cycles a window through landscape, portrait and 4:3. Off by default. */
+  'windows.shapeButton': boolean
+  /** Brings Halone back to the phone when closing an Android app's window moves that app onto it. On by default. */
+  'windows.reclaimPhone': boolean
   /** App ids, in dock order. */
   'dock.pinnedApps': string[]
   'browser.searchEngine': 'duckduckgo' | 'google' | 'bing'
@@ -429,6 +433,15 @@ export interface Settings {
   'developer.enabled': boolean
   /** Keeps Halone's own log on the device and offers to share a report after a crash. Off by default. */
   'diagnostics.crashReports': boolean
+  /** The glasses' refresh rate and the frames actually drawn, along the bottom of the phone pad. */
+  'developer.displayStats': boolean
+  /** Off, each pair of glasses uses its driver's own tracking tuning and the two below are ignored. */
+  'tracking.custom': boolean
+  'tracking.predictionMs': number
+  /** Degrees the view may hold still while the head is at rest. */
+  'tracking.steadinessDegrees': number
+  /** Whether the compositor waits for each frame to reach the display. */
+  'tracking.framePacing': 'auto' | 'wait' | 'free'
   'bedMode.dwellSeconds': number
   'bedMode.countdownSeconds': number
   'bedMode.forwardDegrees': number
