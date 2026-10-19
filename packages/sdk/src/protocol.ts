@@ -427,6 +427,8 @@ export interface Settings {
   'bedMode.enabled': boolean
   /** Lets `@halone/cli` install apps over adb, and run apps from a developer's server. */
   'developer.enabled': boolean
+  /** Keeps Halone's own log on the device and offers to share a report after a crash. Off by default. */
+  'diagnostics.crashReports': boolean
   'bedMode.dwellSeconds': number
   'bedMode.countdownSeconds': number
   'bedMode.forwardDegrees': number
@@ -463,6 +465,8 @@ export interface Methods {
   'system.info': { params: void; result: SystemInfo }
   'system.ping': { params: { sentAt: number }; result: { sentAt: number; receivedAt: number } }
   'system.battery': { params: void; result: Battery }
+  /** Offers Halone's log to the phone's share sheet, while crash reports are on. System apps only. */
+  'system.shareLog': { params: void; result: void }
   /** Saves what the left eye sees to the gallery, after [delayMs] so a caller can get out of the way first. */
   'screen.capture': { params: { delayMs?: number }; result: void }
   'screen.recording': { params: void; result: RecordingState }
