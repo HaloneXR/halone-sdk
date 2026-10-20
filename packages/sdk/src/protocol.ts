@@ -91,6 +91,21 @@ export interface PluginInfo {
   state: PluginState
   /** The names of the apps it adds, while enabled. */
   apps: string[]
+  /** Whether it declares settings of its own, which `plugins.settings` lists. */
+  hasSettings: boolean
+}
+
+export type PluginSettingValue = boolean | number | string
+
+/** One of a plugin's settings, as its declared list describes it. */
+export type PluginSettingItem =
+  | { kind: 'toggle'; key: string; label: string; help: string }
+  | { kind: 'slider'; key: string; label: string; help: string; min: number; max: number; step: number; unit: string }
+  | { kind: 'choice'; key: string; label: string; help: string; options: { value: string; label: string }[] }
+
+export interface PluginSettingsPage {
+  items: PluginSettingItem[]
+  values: Record<string, PluginSettingValue>
 }
 
 /** A plugin's item in the dock's status area, beside the clock. */
@@ -578,6 +593,8 @@ export interface Methods {
   'apps.uninstall': { params: { appId: string }; result: void }
   'plugins.list': { params: void; result: PluginInfo[] }
   'plugins.setEnabled': { params: { packageName: string; enabled: boolean }; result: void }
+  'plugins.settings': { params: { packageName: string }; result: PluginSettingsPage }
+  'plugins.setSetting': { params: { packageName: string; key: string; value: PluginSettingValue }; result: void }
   'status.list': { params: void; result: StatusItem[] }
   /** Tells the item's plugin it was clicked. */
   'status.click': { params: { id: string }; result: void }

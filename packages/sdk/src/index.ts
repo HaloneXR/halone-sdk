@@ -12,6 +12,7 @@ import {
   type DialogAnswer,
   type MediaLayout,
   type MenuItem,
+  type PluginSettingValue,
   type ResizeAnchor,
   type SizeLimits,
   type StereoRegion,
@@ -170,6 +171,8 @@ export function createClient(connection: Promise<Connection>) {
     plugins: {
       list: () => call('plugins.list'),
       setEnabled: (packageName: string, enabled: boolean) => call('plugins.setEnabled', { packageName, enabled }),
+      settings: (packageName: string) => call('plugins.settings', { packageName }),
+      setSetting: (packageName: string, key: string, value: PluginSettingValue) => call('plugins.setSetting', { packageName, key, value }),
     },
     sockets: {
       /** A TCP connection; needs the `network.tcp` permission. */
