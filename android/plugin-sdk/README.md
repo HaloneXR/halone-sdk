@@ -12,7 +12,7 @@ is a working example with one app of each kind.
 
 ```kotlin
 dependencies {
-    implementation("dev.halone:plugin-sdk:0.1.0")
+    implementation("dev.halone:plugin-sdk:0.2.0")
 }
 ```
 
@@ -29,14 +29,16 @@ It is on Maven Central, so the project's repositories need `mavenCentral()`.
     <intent-filter>
         <action android:name="dev.halone.action.PANEL_PROVIDER" />
     </intent-filter>
-    <meta-data android:name="dev.halone.plugin.CONTRACT" android:value="1" />
+    <meta-data android:name="dev.halone.plugin.CONTRACT" android:value="2" />
 </service>
 ```
 
 The permission is defined by the shell at signature level, so only the shell
 can bind the service; the shell refuses a plugin whose service does not
 require it. The contract is the version of the AIDL the plugin was built
-against (`PluginContract.VERSION`).
+against (`PluginContract.VERSION`). A plugin built for contract 2 needs a
+Halone that knows contract 2; one built for 1 keeps working, without settings
+or the environment's start and stop.
 
 ## Write the provider
 
@@ -140,6 +142,41 @@ is in a web app. `host` is the window: `setTitle`, `setBackButton`, `focus`, `cl
 `host.setBackButton(true)` puts a Back button in the title bar, after the
 grip; pressing it calls `onBack()` on the session. The shell takes it away
 when the plugin stops, so set it again in a new session.
+
+## Settings
+
+A plugin can have its own page in Settings: a cog beside it under Plugins
+opens it. List the settings in a raw JSON resource and point the service's
+meta-data at it:
+
+```xml
+<meta-data android:name="dev.halone.plugin.SETTINGS" android:resource="@raw/halone_settings" />
+```
+
+```json
+[
+  { "key": "sync", "type": "boolean", "default": true, "label": "Sync", "help": "Keeps the list up to date." },
+  { "key": "interval", "type": "number", "default": 5, "min": 1, "max": 60, "step": 1, "unit": "min", "label": "Every", "help": "How often to sync." },
+  { "key": "sort", "type": "enum", "default": "name", "values": ["name", "date"], "labels": { "name": "Name", "date": "Date" }, "label": "Sort by", "help": "" }
+]
+```
+
+The shell keeps the values and validates them against the list, so the
+wearer can change them on the phone while the environment is off. A running
+plugin gets them in `onSettingsChanged`, when the shell connects and after
+every change, and `settings` holds the latest: a `Boolean`, `Double` or
+`String` under each key.
+
+## The environment
+
+```kotlin
+override fun onEnvironmentStarted() { ... }
+override fun onEnvironmentStopped() { ... }
+```
+
+`onEnvironmentStopped` also runs when the shell goes away without saying so,
+as when Halone is killed, so whatever `onEnvironmentStarted` changed on the
+phone is undone there.
 
 ## Trust and lifecycle
 

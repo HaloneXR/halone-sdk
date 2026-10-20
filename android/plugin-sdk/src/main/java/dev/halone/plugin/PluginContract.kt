@@ -3,7 +3,7 @@ package dev.halone.plugin
 /** What a plugin and the shell agree on outside the AIDL: how one finds the other, and the keys of an app's description. */
 object PluginContract {
     /** Raised whenever a method is added to the AIDL; the shell binds plugins from 1 up to its own. */
-    const val VERSION = 1
+    const val VERSION = 2
 
     /** The intent action of a plugin's [PanelProviderService]. */
     const val ACTION_PANEL_PROVIDER = "dev.halone.action.PANEL_PROVIDER"
@@ -13,6 +13,13 @@ object PluginContract {
 
     /** Service meta-data: the contract version the plugin was built against. */
     const val META_CONTRACT = "dev.halone.plugin.CONTRACT"
+
+    /**
+     * Service meta-data, from contract 2: a raw JSON resource listing the
+     * plugin's settings, which the shell shows under Settings > Plugins and
+     * hands to [PanelProviderService.onSettingsChanged]; see `README.md`.
+     */
+    const val META_SETTINGS = "dev.halone.plugin.SETTINGS"
 
     /** Panels are laid out at this density, so one dp is one panel pixel, as one CSS pixel is in a web app. */
     const val DENSITY_DPI = 160

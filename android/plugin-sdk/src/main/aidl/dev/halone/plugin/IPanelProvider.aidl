@@ -13,4 +13,7 @@ interface IPanelProvider {
     byte[] appIcon(String appId, int sizePx) = 3;
     IPanel open(String appId, in Bundle args, IPanelHost host) = 4;
     oneway void statusItemClicked(String id) = 5;
+    oneway void settingsChanged(in Bundle values) = 6;
+    oneway void environmentStarted() = 7;
+    oneway void environmentStopped() = 8;
 }
