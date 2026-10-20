@@ -478,6 +478,8 @@ export interface Settings {
   'diagnostics.crashReports': boolean
   /** The glasses' refresh rate and the frames actually drawn, along the bottom of the phone pad. */
   'developer.displayStats': boolean
+  /** Offers to run the environment on the phone's own screen and sensors, with no glasses. Turned on by tapping the glasses on the phone's home screen ten times. */
+  'testMode.enabled': boolean
   /** Off, each pair of glasses uses its driver's own tracking tuning and the two below are ignored. */
   'tracking.custom': boolean
   'tracking.predictionMs': number
