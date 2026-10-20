@@ -210,6 +210,30 @@ export interface SystemInfo {
   }
 }
 
+/** A refresh rate the glasses offer, and whether 3D is possible at it. */
+export interface DisplayRate {
+  hz: number
+  /** False for a rate the glasses only offer in 2D, one picture for both eyes. */
+  stereo: boolean
+  /** False when the phone's own screen cannot refresh in step with this rate, so motion may stutter. */
+  matchesPhone: boolean
+}
+
+export interface DisplayState {
+  /** Whether the environment is running on the glasses. */
+  running: boolean
+  /** True while the environment is drawn in 3D, one image per eye; false in 2D, or when not running. */
+  stereo: boolean
+  /** The rate the glasses' display runs at, or null when not running. */
+  refreshHz: number | null
+  /** Frames Halone actually drew over the last second, or null when not running. */
+  renderFps: number | null
+  /** The rates the connected glasses can be switched to; empty when Halone cannot switch them. */
+  rates: DisplayRate[]
+  /** The refresh rate or 3D settings changed while running; they apply from the next start. */
+  restartNeeded: boolean
+}
+
 export interface Battery {
   /** 0 to 1. */
   level: number
@@ -423,6 +447,10 @@ export interface Settings {
   'browser.adBlocker': boolean
   'panel.distanceMetres': number
   'display.brightness': number
+  /** Hz; glasses that do not offer it use their own default. */
+  'display.refreshRate': number
+  /** Draws one image per eye. Ignored at a rate the glasses only offer in 2D. */
+  'display.stereo': boolean
   'media.screenWidthDegrees': number
   /** Below 1, a 180° or 360° video is squeezed so more of it fits in view. */
   'media.sphereZoom': number
@@ -441,7 +469,7 @@ export interface Settings {
   /** Degrees the view may hold still while the head is at rest. */
   'tracking.steadinessDegrees': number
   /** Whether the compositor waits for each frame to reach the display. */
-  'tracking.framePacing': 'auto' | 'wait' | 'free'
+  'tracking.framePacing': 'auto' | 'wait' | 'free' | 'glasses'
   'bedMode.dwellSeconds': number
   'bedMode.countdownSeconds': number
   'bedMode.forwardDegrees': number
@@ -480,6 +508,9 @@ export interface Methods {
   'system.battery': { params: void; result: Battery }
   /** Offers Halone's log to the phone's share sheet, while crash reports are on. System apps only. */
   'system.shareLog': { params: void; result: void }
+  'display.state': { params: void; result: DisplayState }
+  /** Starts the environment again in the mode the settings ask for, closing every window. */
+  'display.restart': { params: void; result: void }
   /** Saves what the left eye sees to the gallery, after [delayMs] so a caller can get out of the way first. */
   'screen.capture': { params: { delayMs?: number }; result: void }
   'screen.recording': { params: void; result: RecordingState }
@@ -626,6 +657,8 @@ export interface Events {
   'window.focusChanged': { focused: boolean }
   'launcher.changed': { open: boolean }
   'system.batteryChanged': Battery
+  /** The environment started or stopped, or the glasses changed mode: 2D or 3D, or a new refresh rate. */
+  'display.changed': DisplayState
   'screen.recordingChanged': RecordingState
   /** Sent only to the chrome of the web window that changed. */
   'browser.changed': BrowserState

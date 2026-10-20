@@ -94,6 +94,10 @@ export function createClient(connection: Promise<Connection>) {
       battery: () => call('system.battery'),
       shareLog: () => call('system.shareLog'),
     },
+    display: {
+      state: () => call('display.state'),
+      restart: () => call('display.restart'),
+    },
     screen: {
       capture: (delayMs?: number) => call('screen.capture', { delayMs }),
       recording: () => call('screen.recording'),

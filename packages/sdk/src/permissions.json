@@ -3,6 +3,7 @@
     "system.info",
     "system.ping",
     "system.battery",
+    "display.state",
     "windows.self",
     "windows.setTitle",
     "windows.resize",
@@ -63,6 +64,7 @@
     "window.routed",
     "media.changed",
     "system.batteryChanged",
+    "display.changed",
     "socket.data",
     "socket.closed"
   ],
