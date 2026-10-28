@@ -39,7 +39,8 @@ android {
 }
 
 mavenPublishing {
-    publishToMavenCentral()
+    // Uploaded only: a maintainer publishes each release from the Central Portal.
+    publishToMavenCentral(automaticRelease = false)
     signAllPublications()
     pom {
         name = "Halone plugin SDK"

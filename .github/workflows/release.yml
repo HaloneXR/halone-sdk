@@ -3,7 +3,8 @@ name: Release
 # A tag such as 0.3.0 releases that version of every package: @halone/sdk
 # and @halone/cli are staged on npm, where a maintainer approves them with 2FA
 # (`npm stage list @halone/sdk`, then `npm stage approve <id>`), and
-# dev.halone:plugin-sdk goes to Maven Central. The version comes from the tag,
+# dev.halone:plugin-sdk is uploaded to Maven Central, where a maintainer
+# publishes it from the Central Portal. The version comes from the tag,
 # not from the files. A tag with a suffix (0.3.0-beta.1) goes to npm under
 # `next` rather than `latest`.
 #
@@ -114,8 +115,17 @@ jobs:
           ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
           ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
           ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
-        run: ./gradlew :plugin-sdk:publishAndReleaseToMavenCentral -Phalone.version="$GITHUB_REF_NAME" --no-configuration-cache
+        run: ./gradlew :plugin-sdk:publishToMavenCentral -Phalone.version="$GITHUB_REF_NAME" --no-configuration-cache
 
+      - name: Say how to publish it
+        run: |
+          {
+            echo "### Uploaded to Maven Central, waiting to be published"
+            echo
+            echo "Check and publish dev.halone:plugin-sdk:$GITHUB_REF_NAME at https://central.sonatype.com/publishing/deployments"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # Drafted, not published: it goes out by hand once npm and Maven Central have.
   release:
     needs: [npm, maven]
     runs-on: ubuntu-latest
@@ -129,4 +139,4 @@ jobs:
           prerelease=
           case "$GITHUB_REF_NAME" in *-*) prerelease=--prerelease ;; esac
           gh release view "$GITHUB_REF_NAME" -R "$GITHUB_REPOSITORY" > /dev/null 2>&1 ||
-            gh release create "$GITHUB_REF_NAME" -R "$GITHUB_REPOSITORY" --verify-tag --generate-notes $prerelease
+            gh release create "$GITHUB_REF_NAME" -R "$GITHUB_REPOSITORY" --verify-tag --generate-notes --draft $prerelease
