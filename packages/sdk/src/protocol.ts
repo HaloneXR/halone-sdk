@@ -93,6 +93,8 @@ export interface PluginInfo {
   apps: string[]
   /** Whether it declares settings of its own, which `plugins.settings` lists. */
   hasSettings: boolean
+  /** Found since the wearer last looked at the plugins; `plugins.acknowledge` clears it. */
+  new: boolean
 }
 
 export type PluginSettingValue = boolean | number | string
@@ -434,6 +436,9 @@ export type GlassesGestureAction =
   | 'recenter-view'
   | 'toggle-move'
   | 'screenshot'
+/** `none` lifts the limit, which leaves Halone open to being closed by Android when it runs out of memory. */
+export type MemoryLimit = 'auto' | 'low' | 'high' | 'none'
+
 export type PadTapAction = 'disabled' | 'click' | 'context-menu' | 'middle-click' | 'recenter-cursor' | 'recenter-view'
 export type PadHoldAction = PadTapAction | 'scroll' | 'move-window'
 export type TouchpadHoldAction = PadTapAction | 'move-window'
@@ -482,6 +487,10 @@ export interface Settings {
   'developer.displayStats': boolean
   /** Offers to run the environment on the phone's own screen and sensors, with no glasses. Turned on by tapping the glasses on the phone's home screen ten times. */
   'testMode.enabled': boolean
+  /** How many windows may be open at once: `auto` goes by the phone's memory, `low` as on a phone with little of it. */
+  'developer.windowLimit': MemoryLimit
+  /** How many background tabs stay loaded, and for how long, before they are put to sleep. */
+  'developer.tabLimit': MemoryLimit
   /** Off, each pair of glasses uses its driver's own tracking tuning and the two below are ignored. */
   'tracking.custom': boolean
   'tracking.predictionMs': number
@@ -601,6 +610,8 @@ export interface Methods {
   'apps.uninstall': { params: { appId: string }; result: void }
   'plugins.list': { params: void; result: PluginInfo[] }
   'plugins.setEnabled': { params: { packageName: string; enabled: boolean }; result: void }
+  /** The wearer has seen the plugins installed so far, so none of them is `new` any more. */
+  'plugins.acknowledge': { params: void; result: void }
   'plugins.settings': { params: { packageName: string }; result: PluginSettingsPage }
   'plugins.setSetting': { params: { packageName: string; key: string; value: PluginSettingValue }; result: void }
   'status.list': { params: void; result: StatusItem[] }
