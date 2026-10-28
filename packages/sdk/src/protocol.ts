@@ -451,6 +451,8 @@ export interface Settings {
   'windows.autoHideDelaySeconds': number
   /** A title-bar button that cycles a window through landscape, portrait and 4:3. Off by default. */
   'windows.shapeButton': boolean
+  /** Which windows' title bars fade out until the pointer reaches them. `never` by default. */
+  'windows.autoHideTitleBars': 'never' | 'unfocused' | 'always'
   /** Brings Halone back to the phone when closing an Android app's window moves that app onto it. On by default. */
   'windows.reclaimPhone': boolean
   /** App ids, in dock order. */
