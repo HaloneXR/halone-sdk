@@ -93,6 +93,8 @@ export interface PluginInfo {
   apps: string[]
   /** Whether it declares settings of its own, which `plugins.settings` lists. */
   hasSettings: boolean
+  /** Found since the wearer last looked at the plugins; `plugins.acknowledge` clears it. */
+  new: boolean
 }
 
 export type PluginSettingValue = boolean | number | string
@@ -601,6 +603,8 @@ export interface Methods {
   'apps.uninstall': { params: { appId: string }; result: void }
   'plugins.list': { params: void; result: PluginInfo[] }
   'plugins.setEnabled': { params: { packageName: string; enabled: boolean }; result: void }
+  /** The wearer has seen the plugins installed so far, so none of them is `new` any more. */
+  'plugins.acknowledge': { params: void; result: void }
   'plugins.settings': { params: { packageName: string }; result: PluginSettingsPage }
   'plugins.setSetting': { params: { packageName: string; key: string; value: PluginSettingValue }; result: void }
   'status.list': { params: void; result: StatusItem[] }

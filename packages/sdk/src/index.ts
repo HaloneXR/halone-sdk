@@ -172,6 +172,7 @@ export function createClient(connection: Promise<Connection>) {
     plugins: {
       list: () => call('plugins.list'),
       setEnabled: (packageName: string, enabled: boolean) => call('plugins.setEnabled', { packageName, enabled }),
+      acknowledge: () => call('plugins.acknowledge'),
       settings: (packageName: string) => call('plugins.settings', { packageName }),
       setSetting: (packageName: string, key: string, value: PluginSettingValue) => call('plugins.setSetting', { packageName, key, value }),
     },
