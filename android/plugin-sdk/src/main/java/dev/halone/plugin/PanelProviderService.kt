@@ -77,16 +77,49 @@ abstract class PanelProviderService : Service() {
     /** The wearer clicked status item [id]. Main thread. */
     open fun onStatusItemClicked(id: String) {}
 
+    /**
+     * The wearer's values for the settings the plugin declares under
+     * [PluginContract.META_SETTINGS], by key: Boolean, Double or String.
+     * Empty until the shell connects.
+     */
+    var settings: Bundle = Bundle()
+        private set
+
+    /** [settings] arrived or changed. Main thread. */
+    open fun onSettingsChanged(settings: Bundle) {}
+
+    /** Whether the environment is running on the glasses, as far as this plugin was told. */
+    var environmentRunning = false
+        private set
+
+    /** The environment started on the glasses. Main thread. */
+    open fun onEnvironmentStarted() {}
+
+    /**
+     * The environment stopped, or the shell went away without saying so, as
+     * when Halone is killed. Undo here whatever [onEnvironmentStarted] did.
+     * Main thread.
+     */
+    open fun onEnvironmentStopped() {}
+
+    private fun environmentStopped() {
+        if (!environmentRunning) return
+        environmentRunning = false
+        onEnvironmentStopped()
+    }
+
     final override fun onBind(intent: Intent): IBinder = binder
 
     override fun onUnbind(intent: Intent): Boolean {
         providerHost = null
         closeAll()
+        environmentStopped()
         return false
     }
 
     override fun onDestroy() {
         closeAll()
+        environmentStopped()
         super.onDestroy()
     }
 
@@ -114,6 +147,29 @@ abstract class PanelProviderService : Service() {
         override fun statusItemClicked(id: String) {
             enforceShell()
             main.post { if (id in statusItems) onStatusItemClicked(id) }
+        }
+
+        override fun settingsChanged(values: Bundle?) {
+            enforceShell()
+            val copy = Bundle(values ?: Bundle())
+            main.post {
+                settings = copy
+                onSettingsChanged(copy)
+            }
+        }
+
+        override fun environmentStarted() {
+            enforceShell()
+            main.post {
+                if (environmentRunning) return@post
+                environmentRunning = true
+                onEnvironmentStarted()
+            }
+        }
+
+        override fun environmentStopped() {
+            enforceShell()
+            main.post { this@PanelProviderService.environmentStopped() }
         }
 
         override fun listApps(): List<Bundle> {

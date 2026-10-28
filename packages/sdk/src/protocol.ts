@@ -91,6 +91,21 @@ export interface PluginInfo {
   state: PluginState
   /** The names of the apps it adds, while enabled. */
   apps: string[]
+  /** Whether it declares settings of its own, which `plugins.settings` lists. */
+  hasSettings: boolean
+}
+
+export type PluginSettingValue = boolean | number | string
+
+/** One of a plugin's settings, as its declared list describes it. */
+export type PluginSettingItem =
+  | { kind: 'toggle'; key: string; label: string; help: string }
+  | { kind: 'slider'; key: string; label: string; help: string; min: number; max: number; step: number; unit: string }
+  | { kind: 'choice'; key: string; label: string; help: string; options: { value: string; label: string }[] }
+
+export interface PluginSettingsPage {
+  items: PluginSettingItem[]
+  values: Record<string, PluginSettingValue>
 }
 
 /** A plugin's item in the dock's status area, beside the clock. */
@@ -208,6 +223,30 @@ export interface SystemInfo {
     displayWidthPx: number
     displayHeightPx: number
   }
+}
+
+/** A refresh rate the glasses offer, and whether 3D is possible at it. */
+export interface DisplayRate {
+  hz: number
+  /** False for a rate the glasses only offer in 2D, one picture for both eyes. */
+  stereo: boolean
+  /** False when the phone's own screen cannot refresh in step with this rate, so motion may stutter. */
+  matchesPhone: boolean
+}
+
+export interface DisplayState {
+  /** Whether the environment is running on the glasses. */
+  running: boolean
+  /** True while the environment is drawn in 3D, one image per eye; false in 2D, or when not running. */
+  stereo: boolean
+  /** The rate the glasses' display runs at, or null when not running. */
+  refreshHz: number | null
+  /** Frames Halone actually drew over the last second, or null when not running. */
+  renderFps: number | null
+  /** The rates the connected glasses can be switched to; empty when Halone cannot switch them. */
+  rates: DisplayRate[]
+  /** The refresh rate or 3D settings changed while running; they apply from the next start. */
+  restartNeeded: boolean
 }
 
 export interface Battery {
@@ -423,6 +462,10 @@ export interface Settings {
   'browser.adBlocker': boolean
   'panel.distanceMetres': number
   'display.brightness': number
+  /** Hz; glasses that do not offer it use their own default. */
+  'display.refreshRate': number
+  /** Draws one image per eye. Ignored at a rate the glasses only offer in 2D. */
+  'display.stereo': boolean
   'media.screenWidthDegrees': number
   /** Below 1, a 180° or 360° video is squeezed so more of it fits in view. */
   'media.sphereZoom': number
@@ -435,13 +478,15 @@ export interface Settings {
   'diagnostics.crashReports': boolean
   /** The glasses' refresh rate and the frames actually drawn, along the bottom of the phone pad. */
   'developer.displayStats': boolean
+  /** Offers to run the environment on the phone's own screen and sensors, with no glasses. Turned on by tapping the glasses on the phone's home screen ten times. */
+  'testMode.enabled': boolean
   /** Off, each pair of glasses uses its driver's own tracking tuning and the two below are ignored. */
   'tracking.custom': boolean
   'tracking.predictionMs': number
   /** Degrees the view may hold still while the head is at rest. */
   'tracking.steadinessDegrees': number
   /** Whether the compositor waits for each frame to reach the display. */
-  'tracking.framePacing': 'auto' | 'wait' | 'free'
+  'tracking.framePacing': 'auto' | 'wait' | 'free' | 'glasses'
   'bedMode.dwellSeconds': number
   'bedMode.countdownSeconds': number
   'bedMode.forwardDegrees': number
@@ -480,6 +525,9 @@ export interface Methods {
   'system.battery': { params: void; result: Battery }
   /** Offers Halone's log to the phone's share sheet, while crash reports are on. System apps only. */
   'system.shareLog': { params: void; result: void }
+  'display.state': { params: void; result: DisplayState }
+  /** Starts the environment again in the mode the settings ask for, closing every window. */
+  'display.restart': { params: void; result: void }
   /** Saves what the left eye sees to the gallery, after [delayMs] so a caller can get out of the way first. */
   'screen.capture': { params: { delayMs?: number }; result: void }
   'screen.recording': { params: void; result: RecordingState }
@@ -547,6 +595,8 @@ export interface Methods {
   'apps.uninstall': { params: { appId: string }; result: void }
   'plugins.list': { params: void; result: PluginInfo[] }
   'plugins.setEnabled': { params: { packageName: string; enabled: boolean }; result: void }
+  'plugins.settings': { params: { packageName: string }; result: PluginSettingsPage }
+  'plugins.setSetting': { params: { packageName: string; key: string; value: PluginSettingValue }; result: void }
   'status.list': { params: void; result: StatusItem[] }
   /** Tells the item's plugin it was clicked. */
   'status.click': { params: { id: string }; result: void }
@@ -626,6 +676,8 @@ export interface Events {
   'window.focusChanged': { focused: boolean }
   'launcher.changed': { open: boolean }
   'system.batteryChanged': Battery
+  /** The environment started or stopped, or the glasses changed mode: 2D or 3D, or a new refresh rate. */
+  'display.changed': DisplayState
   'screen.recordingChanged': RecordingState
   /** Sent only to the chrome of the web window that changed. */
   'browser.changed': BrowserState
