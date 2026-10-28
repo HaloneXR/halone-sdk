@@ -451,6 +451,8 @@ export interface Settings {
   'windows.autoHideDelaySeconds': number
   /** A title-bar button that cycles a window through landscape, portrait and 4:3. Off by default. */
   'windows.shapeButton': boolean
+  /** Which windows' title bars fade out until the pointer reaches them. `never` by default. */
+  'windows.autoHideTitleBars': 'never' | 'unfocused' | 'always'
   /** Brings Halone back to the phone when closing an Android app's window moves that app onto it. On by default. */
   'windows.reclaimPhone': boolean
   /** App ids, in dock order. */
@@ -493,6 +495,8 @@ export interface Settings {
   'input.pointer': 'gaze' | 'phone' | 'touchpad'
   'input.touchpadSpeed': number
   'input.mouseSpeed': number
+  /** A touchpad or mouse cursor is carried along by the window or dock it is on as they move. On by default. */
+  'input.pointerMovesWithWindows': boolean
   'gesture.glasses.left.tap': GlassesGestureAction
   'gesture.glasses.right.tap': GlassesGestureAction
   'gesture.glasses.left.doubleTap': GlassesGestureAction
@@ -585,6 +589,8 @@ export interface Methods {
   'input.keyCapture': { params: void; result: { enabled: boolean } }
   /** Opens Android's accessibility settings on the phone, where key capture is turned on. */
   'input.openKeyCaptureSettings': { params: void; result: void }
+  /** Whether a mouse or trackpad is connected to the phone, which then moves the cursor. */
+  'input.pointingDevice': { params: void; result: { connected: boolean } }
   'launcher.get': { params: void; result: { open: boolean } }
   'launcher.setOpen': { params: { open: boolean }; result: void }
   /** The apps to offer the wearer; with [includeHidden] also the ones only opened for a file or by the shell. */
