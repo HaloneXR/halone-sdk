@@ -6,7 +6,8 @@ plugins {
 }
 
 group = "dev.halone"
-version = "0.2.0"
+// Releases are versioned by their tag: -Phalone.version=0.3.0.
+version = findProperty("halone.version") as String? ?: "0.2.0"
 
 android {
     namespace = "dev.halone.plugin"
@@ -65,8 +66,9 @@ mavenPublishing {
     }
 }
 
+// CI signs with the key it is given; a release from a workstation uses gpg.
 signing {
-    useGpgCmd()
+    if (findProperty("signingInMemoryKey") == null) useGpgCmd()
 }
 
 dependencies {
