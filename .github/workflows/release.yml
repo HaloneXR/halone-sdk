@@ -1,9 +1,14 @@
 name: Release
 
-# A tag such as 0.3.0 publishes that version of every package: @halone/sdk
-# and @halone/cli to npm, dev.halone:plugin-sdk to Maven Central. The version
-# comes from the tag, not from the files. A tag with a suffix (0.3.0-beta.1)
-# goes to npm under `next` rather than `latest`.
+# A tag such as 0.3.0 releases that version of every package: @halone/sdk
+# and @halone/cli are staged on npm, where a maintainer approves them with 2FA
+# (`npm stage list @halone/sdk`, then `npm stage approve <id>`), and
+# dev.halone:plugin-sdk goes to Maven Central. The version comes from the tag,
+# not from the files. A tag with a suffix (0.3.0-beta.1) goes to npm under
+# `next` rather than `latest`.
+#
+# npm signs this workflow in through trusted publishing (OIDC), with no token;
+# each package's trusted publisher allows only `npm stage publish`.
 
 on:
   push:
@@ -58,6 +63,9 @@ jobs:
           cache: pnpm
           registry-url: https://registry.npmjs.org
 
+      # `npm stage` needs npm 11.15 or later, newer than Node 24 may bring.
+      - run: npm install -g npm@11
+
       - run: pnpm install --frozen-lockfile
 
       - name: Version the packages from the tag
@@ -65,14 +73,26 @@ jobs:
 
       - run: pnpm build
 
-      - name: Publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_PROVENANCE: true
+      # `npm stage` is unaware of workspaces, so each package is staged from
+      # its own directory. Provenance comes with trusted publishing.
+      - name: Stage for approval
         run: |
           channel=latest
           case "$GITHUB_REF_NAME" in *-*) channel=next ;; esac
-          pnpm -r --filter "./packages/*" publish --access public --no-git-checks --tag "$channel"
+          for package in packages/sdk packages/cli; do
+            (cd "$package" && npm stage publish --access public --tag "$channel")
+          done
+          {
+            echo "### Staged on npm, waiting for approval"
+            echo
+            echo "Approve each with 2FA, on npmjs.com (Staged Packages) or with:"
+            echo
+            echo '```'
+            echo "npm stage list @halone/sdk"
+            echo "npm stage list @halone/cli"
+            echo "npm stage approve <stage-id>"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
   maven:
     needs: test
