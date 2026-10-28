@@ -1,6 +1,6 @@
 {
   "name": "@halone/cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "halone dev | pack | install: run, package and install Halone apps",
   "license": "MIT",
   "repository": {

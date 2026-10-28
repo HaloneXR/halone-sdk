@@ -1,6 +1,6 @@
 {
   "name": "@halone/sdk",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Build apps for Halone, the XR environment for XREAL glasses: the bridge to the shell and its types",
   "license": "MIT",
   "repository": {
