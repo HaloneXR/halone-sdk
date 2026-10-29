@@ -506,6 +506,8 @@ export interface Settings {
   'input.mouseSpeed': number
   /** A touchpad or mouse cursor is carried along by the window or dock it is on as they move. On by default. */
   'input.pointerMovesWithWindows': boolean
+  /** Whether the wearer agreed to Halone's disclosure for key capture; until `granted`, the accessibility service is left unused even if Android has it on. */
+  'input.keyCaptureConsent': 'unasked' | 'granted' | 'declined'
   'gesture.glasses.left.tap': GlassesGestureAction
   'gesture.glasses.right.tap': GlassesGestureAction
   'gesture.glasses.left.doubleTap': GlassesGestureAction
